@@ -1,0 +1,26 @@
+# /etc/systemd/system/pyipam.service – see README ("Install as a systemd service")
+[Unit]
+Description=pyIPAM
+After=network.target
+
+[Service]
+Type=simple
+User=pyipam
+Group=pyipam
+WorkingDirectory=/opt/pyipam
+Environment=IPAM_DATA_DIR=/opt/pyipam/data
+Environment=IPAM_BACKUP_KEEP=14
+ExecStart=/opt/pyipam/venv/bin/gunicorn -w 2 --threads 4 --preload --timeout 90 -b 127.0.0.1:8088 app:app
+Restart=on-failure
+RestartSec=3
+# Allow the ping scan
+AmbientCapabilities=CAP_NET_RAW
+CapabilityBoundingSet=CAP_NET_RAW
+# Hardening: only the data directory is writable
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/pyipam/data
+
+[Install]
+WantedBy=multi-user.target

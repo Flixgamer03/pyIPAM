@@ -1,0 +1,19 @@
+services:
+  pyipam:
+    image: ghcr.io/flixgamer03/pyipam:latest
+    build: .                        # builds locally when started from a clone of the repo
+    container_name: pyipam
+    restart: unless-stopped
+    ports:
+      - "8080:8080"                 # open http(s)://<server>:8080
+    volumes:
+      - ./data:/data                # database, secret key, backups, certificates (data/tls/)
+    environment:
+      TZ: Etc/UTC                   # your time zone, e.g. Europe/Berlin
+      # HTTPS: "auto" uses data/tls/cert.pem + key.pem if present, "self-signed" creates them, "off" = HTTP only
+      IPAM_TLS: auto
+      # IPAM_TLS_HOSTNAME: ipam.example.com   # name for the self-signed certificate
+      # IPAM_TRUSTED_PROXIES: "1"            # only if you put your own reverse proxy in front
+      IPAM_BACKUP_KEEP: "14"
+    sysctls:
+      net.ipv4.ping_group_range: "0 2147483647"   # ping scan without root
